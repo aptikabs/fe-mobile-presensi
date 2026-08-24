@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">bengkuluprov.go.id</domain>
+        <domain includeSubdomains="true">devepresensimobile.bengkuluprov.go.id</domain>
+        <domain includeSubdomains="true">epresensimobile.bengkuluprov.go.id</domain>
+        <pin-set expiration="2038-01-01">
+            <!-- Leaf Certificate: devepresensimobile.bengkuluprov.go.id -->
+            <pin digest="SHA-256">Go6Yu/bl7FLqTH0SHuWhONAM92dahY9a7mPf8rIqrFs=</pin>
+            <!-- Intermediate CA: Amazon RSA 2048 M04 -->
+            <pin digest="SHA-256">G9LNNAql897egYsabashkzUCTEJkWBzgoEtk8X/678c=</pin>
+            <!-- Root CA: Amazon Root CA 1 (Mencegah aplikasi break saat AWS ACM rotate cert) -->
+            <pin digest="SHA-256">++MBgDH5WGvL9Bcn5Be30cRcL0f5O+NyoXuWtQdX1aI=</pin>
+        </pin-set>
+    </domain-config>
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>
