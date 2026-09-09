@@ -34,9 +34,11 @@ void main() {
         return;
       }
 
-      await Firebase.initializeApp(
-        options: DefaultFirebaseOptions.currentPlatform,
-      );
+      if (Firebase.apps.isEmpty) {
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
+      }
 
       // Inisialisasi ServiceLocator (Hive Encrypted Box + Keystore + iOS Backup)
       final boxes = await ServiceLocator.init();

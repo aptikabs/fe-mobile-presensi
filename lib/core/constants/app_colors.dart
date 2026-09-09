@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // Primary Colors (Brand Red)
-  static const Color primary50 = Color(0xFFFEF2F2);
-  static const Color primary100 = Color(0xFFFADCDD);
-  static const Color primary200 = Color(0xFFF2B2B5);
-  static const Color primary300 = Color(0xFFE98085);
-  static const Color primary400 = Color(0xFFE1595E);
-  static const Color primary500 = Color(0xFFD64045);
-  static const Color primary600 = Color(0xFFB82E34);
-  static const Color primary700 = Color(0xFF962227);
-  static const Color primary800 = Color(0xFF76181C);
-  static const Color primary900 = Color(0xFF540F12);
+  static const Color primary50 = Color(0xFFF0FFF7);
+  static const Color primary100 = Color(0xFFD9F7E8);
+  static const Color primary200 = Color(0xFFB3EFD1);
+  static const Color primary300 = Color(0xFF66D9A3);
+  static const Color primary400 = Color(0xFF33BA79);
+  static const Color primary500 = Color(0xFF009B4F);
+  static const Color primary600 = Color(0xFF008A46);
+  static const Color primary700 = Color(0xFF00753C);
+  static const Color primary800 = Color(0xFF005F31);
+  static const Color primary900 = Color(0xFF004A26);
 
   // Secondary Colors (Blue)
   static const Color secondary100 = Color(0xFFDBEAFE);

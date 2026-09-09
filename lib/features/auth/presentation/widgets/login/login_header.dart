@@ -44,7 +44,7 @@ class LoginHeader extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          'Pemerintah Provinsi Bengkulu',
+          'Pemerintah Kabupaten Bengkulu Selatan',
           textAlign: TextAlign.center,
           style: Theme.of(
             context,

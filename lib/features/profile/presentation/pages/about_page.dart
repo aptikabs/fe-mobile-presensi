@@ -83,7 +83,7 @@ class _AboutPageState extends State<AboutPage> {
               ),
               const SizedBox(height: 8),
               const Text(
-                'Pemerintah Provinsi Bengkulu',
+                'Pemerintah Kabupaten Bengkulu Selatan',
                 style: TextStyle(
                   fontSize: 16,
                   color: AppColors.neutral500,
@@ -110,7 +110,7 @@ class _AboutPageState extends State<AboutPage> {
                 ),
               ),
               const SizedBox(height: 32),
-              Image.asset('assets/logo/logo_pemprov_bkl_text.png', width: 200),
+              Image.asset('assets/logo/logo_kab_bs_text.png', width: 200),
               const SizedBox(height: 16),
               Text(
                 '© $_year Pemerintah Provinsi Bengkulu',

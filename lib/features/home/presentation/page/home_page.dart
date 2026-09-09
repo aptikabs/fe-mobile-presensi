@@ -20,7 +20,9 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Dependency Injection for Banner (ideally move to main/DI)
-    final remoteDataSource = BannerRemoteDataSourceImpl(client: PinnedHttpClient.createClient());
+    final remoteDataSource = BannerRemoteDataSourceImpl(
+      client: PinnedHttpClient.createClient(),
+    );
     final repository = BannerRepositoryImpl(remoteDataSource: remoteDataSource);
     final getBanners = GetBanners(repository);
 
@@ -148,7 +150,7 @@ class HomePage extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Image.asset(
-                      'assets/logo/logo_pemprov_bengkulu.webp',
+                      'assets/logo/logo_pemkab_bs.png',
                       fit: BoxFit.contain,
                       errorBuilder: (_, __, ___) =>
                           const Icon(Icons.person, color: AppColors.primary500),

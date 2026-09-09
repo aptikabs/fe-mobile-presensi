@@ -18,14 +18,15 @@ class PinnedHttpClient {
 
   /// Daftar Host/Domain Backend yang Diizinkan
   static const List<String> allowedHosts = [
-    'bengkuluprov.go.id',
-    'devepresensimobile.bengkuluprov.go.id',
-    'epresensimobile.bengkuluprov.go.id',
+    'bengkuluselatankab.go.id',
+    'presensi.bengkuluseltankab.go.id',
   ];
 
   /// Mengecek apakah host diizinkan
   static bool isHostAllowed(String host) {
-    return allowedHosts.any((allowed) => host == allowed || host.endsWith('.$allowed'));
+    return allowedHosts.any(
+      (allowed) => host == allowed || host.endsWith('.$allowed'),
+    );
   }
 
   /// Verifikasi Sertifikat SSL terhadap SHA-256 SPKI Pins
@@ -50,11 +51,15 @@ class PinnedHttpClient {
 
       // Jika pada kDebugMode dan pin tidak cocok (misal cert staging berubah), izinkan log peringatan
       if (kDebugMode) {
-        debugPrint('⚠️ [DEBUG MODE] Certificate Hash ($base64Hash) tidak ada di allowedSha256Pins.');
+        debugPrint(
+          '⚠️ [DEBUG MODE] Certificate Hash ($base64Hash) tidak ada di allowedSha256Pins.',
+        );
         return true;
       }
 
-      debugPrint('⛔ SSL Pinning / Certificate SPKI Validation Failure for host: $host');
+      debugPrint(
+        '⛔ SSL Pinning / Certificate SPKI Validation Failure for host: $host',
+      );
       debugPrint('   Calculated Certificate Hash: $base64Hash');
       return false;
     } catch (e) {

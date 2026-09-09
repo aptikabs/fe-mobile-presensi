@@ -20,7 +20,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.diskominfo_prov_bengkulu.e_presensimobileprovinsibengkulu"
+    namespace = "com.diskominfo_kab_bengkuluselatan.e_presensimobilekabupatenbengkuluselatan"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -36,7 +36,7 @@ android {
 
     defaultConfig {
         // [ADOPTION REQUIREMENT] Wajib diganti dengan Package Name / Application ID daerah Anda
-        applicationId = "id.go.namadaerah.epresensi"
+        applicationId = "id.go.bengkuluselatan.epresensi"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

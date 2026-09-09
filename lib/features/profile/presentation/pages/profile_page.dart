@@ -70,7 +70,7 @@ class ProfilePage extends StatelessWidget {
                           ),
                           child: Center(
                             child: Image.asset(
-                              'assets/logo/logo_pemprov_bengkulu.webp',
+                              'assets/logo/logo_pemkab_bs.png',
                               fit: BoxFit.contain,
                             ),
                           ),
@@ -222,9 +222,7 @@ class ProfilePage extends StatelessWidget {
                     children: [
                       SizedBox(
                         width: 200,
-                        child: Image.asset(
-                          'assets/logo/logo_pemprov_bkl_text.png',
-                        ),
+                        child: Image.asset('assets/logo/logo_kab_bs_text.png'),
                       ),
                     ],
                   ),
