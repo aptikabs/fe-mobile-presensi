@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -79,6 +80,89 @@ class PinnedHttpClient {
         return verifyCertificate(cert, host);
       };
 
-    return IOClient(ioClient);
+    final client = IOClient(ioClient);
+    return kDebugMode ? DebugHttpClient(client) : client;
+  }
+}
+
+class DebugHttpClient extends http.BaseClient {
+  final http.Client _inner;
+
+  DebugHttpClient(this._inner);
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) async {
+    debugPrint('--- API REQUEST ---');
+    debugPrint('${request.method} ${request.url}');
+    debugPrint('Headers: ${_redactMap(request.headers)}');
+    debugPrint('Body: ${_requestBody(request)}');
+
+    final response = await _inner.send(request);
+    final responseBytes = <int>[];
+    final responseStream = response.stream.transform(
+      StreamTransformer<List<int>, List<int>>.fromHandlers(
+        handleData: (chunk, sink) {
+          responseBytes.addAll(chunk);
+          sink.add(chunk);
+        },
+        handleDone: (sink) {
+          final body = utf8.decode(responseBytes, allowMalformed: true);
+          debugPrint('--- API RESPONSE ---');
+          debugPrint('${response.statusCode} ${request.url}');
+          debugPrint('Headers: ${_redactMap(response.headers)}');
+          debugPrint('Body: ${_truncate(body)}');
+          sink.close();
+        },
+      ),
+    );
+
+    return http.StreamedResponse(
+      http.ByteStream(responseStream),
+      response.statusCode,
+      contentLength: response.contentLength,
+      request: response.request,
+      headers: response.headers,
+      isRedirect: response.isRedirect,
+      persistentConnection: response.persistentConnection,
+      reasonPhrase: response.reasonPhrase,
+    );
+  }
+
+  @override
+  void close() {
+    _inner.close();
+  }
+
+  static String _requestBody(http.BaseRequest request) {
+    if (request is http.Request) return _truncate(request.body);
+    if (request is http.MultipartRequest) {
+      final fields = <String, dynamic>{...request.fields};
+      for (final key in fields.keys.toList()) {
+        if (_isSensitiveKey(key)) fields[key] = '***';
+      }
+      return 'fields: $fields, files: ${request.files.map((file) => file.field).toList()}';
+    }
+    return '(streamed body)';
+  }
+
+  static Map<String, String> _redactMap(Map<String, String> values) {
+    return values.map(
+      (key, value) => MapEntry(key, _isSensitiveKey(key) ? '***' : value),
+    );
+  }
+
+  static bool _isSensitiveKey(String key) {
+    final normalized = key.toLowerCase();
+    return normalized.contains('authorization') ||
+        normalized.contains('password') ||
+        normalized.contains('token') ||
+        normalized.contains('secret');
+  }
+
+  static String _truncate(String value) {
+    const maxLength = 10000;
+    return value.length <= maxLength
+        ? value
+        : '${value.substring(0, maxLength)}... [truncated]';
   }
 }

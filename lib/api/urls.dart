@@ -116,7 +116,7 @@ class Urls {
   static String get daftarPerangkat => '$baseUrl/v3/daftar-perangkat';
 
   // ABSEN
-  static String get absen => '$baseUrl/presensi/simpan';
+  static String get absen => '$baseUrl/v3/presensi/simpan';
 
   // BANNER
   static String get banner => '$baseUrl/v3/banners';

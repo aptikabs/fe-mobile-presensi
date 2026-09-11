@@ -14,15 +14,16 @@ class AppColors {
   static const Color primary900 = Color(0xFF004A26);
 
   // Secondary Colors (Blue)
-  static const Color secondary100 = Color(0xFFDBEAFE);
-  static const Color secondary200 = Color(0xFFBFDBFE);
-  static const Color secondary300 = Color(0xFF93C5FD);
-  static const Color secondary400 = Color(0xFF60A5FA);
-  static const Color secondary500 = Color(0xFF3B82F6);
-  static const Color secondary600 = Color(0xFF2563EB);
-  static const Color secondary700 = Color(0xFF1D4ED8);
-  static const Color secondary800 = Color(0xFF1E40AF);
-  static const Color secondary900 = Color(0xFF1E3A8A);
+    static const Color secondary50 = Color(0xFFF0FFF7);
+  static const Color secondary100 = Color(0xFFD9F7E8);
+  static const Color secondary200 = Color(0xFFB3EFD1);
+  static const Color secondary300 = Color(0xFF66D9A3);
+  static const Color secondary400 = Color(0xFF33BA79);
+  static const Color secondary500 = Color(0xFF009B4F);
+  static const Color secondary600 = Color(0xFF008A46);
+  static const Color secondary700 = Color(0xFF00753C);
+  static const Color secondary800 = Color(0xFF005F31);
+  static const Color secondary900 = Color(0xFF004A26);
 
   // Neutral Colors (Greys)
   static const Color neutral50 = Color(0xFFF9FAFB);

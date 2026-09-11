@@ -50,11 +50,11 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'YOUR_FIREBASE_ANDROID_API_KEY',
-    appId: '1:000000000000:android:0000000000000000000000',
-    messagingSenderId: '000000000000',
-    projectId: 'your-firebase-project-id',
-    storageBucket: 'your-firebase-project-id.appspot.com',
+    apiKey: 'AIzaSyCq0m72obK1Vz-l9TrWPFh6oMpbhzLTe_g',
+    appId: '1:918449592882:android:09483e2202e72fe0f63a2b',
+    messagingSenderId: '918449592882',
+    projectId: 'bs-presensi',
+    storageBucket: 'bs-presensi.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(

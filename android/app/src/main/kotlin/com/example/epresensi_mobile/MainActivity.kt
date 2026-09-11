@@ -1,4 +1,4 @@
-package com.diskominfo_prov_bengkulu.e_presensimobileprovinsibengkulu
+package com.diskominfo_kab_bengkuluselatan.e_presensimobilekabupatenbengkuluselatan
 
 import android.content.Context
 import android.hardware.Sensor

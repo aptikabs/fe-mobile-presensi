@@ -14,7 +14,7 @@
     <uses-feature android:name="android.hardware.camera" />
 
     <application
-        android:label="E-Presensi Mobile Provinsi Bengkulu"
+        android:label="Membara Mobile"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"
@@ -24,7 +24,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_GOOGLE_MAPS_API_KEY" />
+            android:value="AIzaSyDLq8DF4Had2UDGkswXzPwFGzPBBpfTyr0" />
 
         <activity
             android:name=".MainActivity"
