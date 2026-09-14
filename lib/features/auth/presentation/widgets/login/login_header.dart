@@ -34,7 +34,7 @@ class LoginHeader extends StatelessWidget {
         ),
         const SizedBox(height: 24),
         Text(
-          'E-Presensi Mobile',
+          'Membara Mobile',
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,

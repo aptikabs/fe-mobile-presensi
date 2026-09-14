@@ -10,17 +10,15 @@ import 'package:http/io_client.dart';
 /// Client HTTP Terproteksi dengan Validasi Strict Sertifikat SSL / SPKI.
 /// Mencegah Interception MITM dan SSL Pinning Bypass sederhana pada Flutter Engine.
 class PinnedHttpClient {
-  /// SHA-256 Public Key Hashes (SPKI) untuk domain bengkuluprov.go.id (AWS ACM Chain)
+  /// SHA-256 hash sertifikat DER yang dihitung oleh verifyCertificate.
   static const List<String> allowedSha256Pins = [
-    'Go6Yu/bl7FLqTH0SHuWhONAM92dahY9a7mPf8rIqrFs=', // Leaf: devepresensimobile.bengkuluprov.go.id
-    'G9LNNAql897egYsabashkzUCTEJkWBzgoEtk8X/678c=', // Intermediate CA: Amazon RSA 2048 M04
-    '++MBgDH5WGvL9Bcn5Be30cRcL0f5O+NyoXuWtQdX1aI=', // Root CA: Amazon Root CA 1
+    'WT+/NYmOE4tylr2g1BqgoSHHiz2/qvFfS3iBMZehB/M=', // Certificate served to Dart/Flutter runtime
   ];
 
   /// Daftar Host/Domain Backend yang Diizinkan
   static const List<String> allowedHosts = [
     'bengkuluselatankab.go.id',
-    'presensi.bengkuluseltankab.go.id',
+    'presensi.bengkuluselatankab.go.id',
   ];
 
   /// Mengecek apakah host diizinkan
@@ -31,7 +29,11 @@ class PinnedHttpClient {
   }
 
   /// Verifikasi Sertifikat SSL terhadap SHA-256 SPKI Pins
-  static bool verifyCertificate(X509Certificate cert, String host) {
+  static bool verifyCertificate(
+    X509Certificate cert,
+    String host, {
+    bool allowDebugBypass = kDebugMode,
+  }) {
     if (!isHostAllowed(host)) {
       debugPrint('⛔ SSL Pinning Failure: Host tidak diizinkan "$host"');
       return false;
@@ -51,7 +53,7 @@ class PinnedHttpClient {
       }
 
       // Jika pada kDebugMode dan pin tidak cocok (misal cert staging berubah), izinkan log peringatan
-      if (kDebugMode) {
+      if (allowDebugBypass) {
         debugPrint(
           '⚠️ [DEBUG MODE] Certificate Hash ($base64Hash) tidak ada di allowedSha256Pins.',
         );
@@ -70,18 +72,19 @@ class PinnedHttpClient {
   }
 
   /// Membuat instance http.Client terproteksi
-  static http.Client createClient() {
+  static http.Client createClient({bool? allowDebugBypass}) {
     // Mematikan kepercayaan pada Root CA bawaan OS Android/User Trust Store (withTrustedRoots: false).
     // Ini memastikan sertifikat CA proxy (seperti Burp Suite / HTTP Toolkit) otomatis memicu badCertificateCallback.
+    final shouldBypassPin = allowDebugBypass ?? kDebugMode;
     final SecurityContext context = SecurityContext(withTrustedRoots: false);
 
     final HttpClient ioClient = HttpClient(context: context)
       ..badCertificateCallback = (X509Certificate cert, String host, int port) {
-        return verifyCertificate(cert, host);
+        return verifyCertificate(cert, host, allowDebugBypass: shouldBypassPin);
       };
 
     final client = IOClient(ioClient);
-    return kDebugMode ? DebugHttpClient(client) : client;
+    return shouldBypassPin ? DebugHttpClient(client) : client;
   }
 }
 

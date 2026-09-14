@@ -232,25 +232,25 @@ class _SplashPageState extends State<SplashPage> with WidgetsBindingObserver {
           ),
 
           // Branding at bottom
-          Positioned(
-            bottom: 32,
-            left: 0,
-            right: 0,
-            child: Column(
-              children: [
-                Text(
-                  'Powered by',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                Center(
-                  child: Image.asset('assets/images/watermark.png', height: 80),
-                ),
-              ],
-            ),
-          ),
+          //   Positioned(
+          //     bottom: 32,
+          //     left: 0,
+          //     right: 0,
+          //     child: Column(
+          //       children: [
+          //         Text(
+          //           'Powered by',
+          //           textAlign: TextAlign.center,
+          //           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+          //             color: AppColors.textSecondary,
+          //           ),
+          //         ),
+          //         Center(
+          //           child: Image.asset('assets/images/watermark.png', height: 80),
+          //         ),
+          //       ],
+          //     ),
+          //   ),
         ],
       ),
     );
