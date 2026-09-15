@@ -222,7 +222,7 @@ class ProfilePage extends StatelessWidget {
                     children: [
                       SizedBox(
                         width: 200,
-                        child: Image.asset('assets/logo/logo_kab_bs_text.png'),
+                        child: Image.asset('assets/logo/branding.webp'),
                       ),
                     ],
                   ),

@@ -261,19 +261,16 @@ class _SplashPageState extends State<SplashPage> with WidgetsBindingObserver {
             right: 0,
             child: Column(
               children: [
-                Text(
-                  'Powered by',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                Center(
+                 Center(
                   child: Image.asset(
-                    'assets/images/branding.webp',
-                    height: 150,
+                    'assets/images/branding.webp', height: 200,
                   ),
                 ),
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
