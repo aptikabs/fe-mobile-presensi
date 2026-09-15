@@ -269,13 +269,11 @@ class _SplashPageState extends State<SplashPage> with WidgetsBindingObserver {
                   ),
                 ),
                 Center(
-                  child: Image.asset('assets/images/branding.webp', height: 150),
+                  child: Image.asset(
+                    'assets/images/branding.webp',
+                    height: 150,
+                  ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-}

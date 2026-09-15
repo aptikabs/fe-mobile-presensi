@@ -74,7 +74,7 @@ class _AboutPageState extends State<AboutPage> {
               ),
               const SizedBox(height: 24),
               const Text(
-                'E-Presensi Mobile',
+                'Membara Mobile Mobile',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,

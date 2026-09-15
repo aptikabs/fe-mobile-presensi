@@ -14,7 +14,7 @@ class AppColors {
   static const Color primary900 = Color(0xFF004A26);
 
   // Secondary Colors (Blue)
-    static const Color secondary50 = Color(0xFFF0FFF7);
+  static const Color secondary50 = Color(0xFFF0FFF7);
   static const Color secondary100 = Color(0xFFD9F7E8);
   static const Color secondary200 = Color(0xFFB3EFD1);
   static const Color secondary300 = Color(0xFF66D9A3);
@@ -49,16 +49,17 @@ class AppColors {
   static const Color success800 = Color(0xFF166534);
   static const Color success900 = Color(0xFF14532D);
 
-  // Info Colors (Sky Blue)
-  static const Color info100 = Color(0xFFE0F2FE);
-  static const Color info200 = Color(0xFFBAE6FD);
-  static const Color info300 = Color(0xFF7DD3FC);
-  static const Color info400 = Color(0xFF38BDF8);
-  static const Color info500 = Color(0xFF0EA5E9);
-  static const Color info600 = Color(0xFF0284C7);
-  static const Color info700 = Color(0xFF0369A1);
-  static const Color info800 = Color(0xFF075985);
-  static const Color info900 = Color(0xFF0C4A6E);
+  // Info Colors (GREEN)
+  static const Color info50 = Color(0xFFF0FDF4);
+  static const Color info100 = Color(0xFFDCFCE7);
+  static const Color info200 = Color(0xFFBBF7D0);
+  static const Color info300 = Color(0xFF86EFAC);
+  static const Color info400 = Color(0xFF4ADE80);
+  static const Color info500 = Color(0xFF22C55E);
+  static const Color info600 = Color(0xFF16A34A);
+  static const Color info700 = Color(0xFF15803D);
+  static const Color info800 = Color(0xFF166534);
+  static const Color info900 = Color(0xFF14532D);
 
   // Warning Colors (Amber)
   static const Color warning100 = Color(0xFFFEF3C7);

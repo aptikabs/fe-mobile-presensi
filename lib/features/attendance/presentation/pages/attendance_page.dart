@@ -30,7 +30,9 @@ class AttendancePage extends StatelessWidget {
     // Dependency Injection (Manual for now to avoid global service locator changes)
     return RepositoryProvider(
       create: (context) => AttendanceRepositoryImpl(
-        remoteDataSource: AttendanceRemoteDataSourceImpl(client: PinnedHttpClient.createClient()),
+        remoteDataSource: AttendanceRemoteDataSourceImpl(
+          client: PinnedHttpClient.createClient(),
+        ),
         networkInfo: context.read<NetworkInfo>(),
       ),
       child: BlocProvider(
@@ -159,6 +161,11 @@ class _AttendanceViewState extends State<AttendanceView> {
             return true;
           },
           listener: (context, state) {
+            if (state is AttendanceSecurityBlocked) {
+              _showResultDialog(context, false, state.message);
+              return;
+            }
+
             if (state is AttendanceLoaded) {
               if (state.errorMessage != null && !state.isLoadingLocation) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -404,7 +411,8 @@ class _AttendanceViewState extends State<AttendanceView> {
 
     final placeName = state.nearestPlaceName ?? 'Lokasi Tidak Diketahui';
 
-    final bool canPresensi = !state.isLoadingLocation &&
+    final bool canPresensi =
+        !state.isLoadingLocation &&
         state.currentPosition != null &&
         (state.isWfa || state.isInsideRadius);
 

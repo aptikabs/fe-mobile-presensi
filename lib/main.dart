@@ -10,29 +10,12 @@ import 'app/app.dart';
 import 'app/app_providers.dart';
 import 'core/di/service_locator.dart';
 import 'core/network/pinned_http_client.dart';
-import 'core/security/environment_security_service.dart';
-import 'features/security/presentation/pages/security_violation_page.dart';
 import 'firebase_options.dart';
 
 void main() {
   runZonedGuarded(
     () async {
       WidgetsFlutterBinding.ensureInitialized();
-
-      // Audit Keamanan Perangkat di Awal Eksekusi (Khusus Pemblokiran Emulator)
-      final auditResult = await EnvironmentSecurityService.auditEnvironment();
-
-      if (!auditResult.isSecure) {
-        runApp(
-          MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: SecurityViolationPage(
-              deviceDetails: auditResult.deviceDetails,
-            ),
-          ),
-        );
-        return;
-      }
 
       if (Firebase.apps.isEmpty) {
         await Firebase.initializeApp(

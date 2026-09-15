@@ -7,7 +7,8 @@ import 'package:security_plus/security_plus.dart';
 
 /// Hasil audit lingkungan perangkat
 class EnvironmentAuditResult {
-  final bool isSecure; // false jika isEmulator == true atau isFridaDetected == true
+  final bool
+  isSecure; // false jika isEmulator == true atau isFridaDetected == true
   final bool isEmulator;
   final bool isJailBroken;
   final bool isDevMode;
@@ -29,8 +30,9 @@ class EnvironmentAuditResult {
 /// Service untuk melakukan audit keamanan lingkungan perangkat (Environment Security).
 /// Memeriksa status Root, Jailbreak, Developer Mode, Mock Location, Frida/Instrumentation, dan Untrusted Emulator.
 class EnvironmentSecurityService {
-  static const MethodChannel _nativeChannel =
-      MethodChannel('epresensi/native_security');
+  static const MethodChannel _nativeChannel = MethodChannel(
+    'epresensi/native_security',
+  );
 
   /// Memeriksa atribut hardware & file pipe QEMU native di Android
   static Future<bool> isNativeEmulator() async {
@@ -87,14 +89,18 @@ class EnvironmentSecurityService {
         details['Hardware'] = androidInfo.hardware;
         details['Device'] = androidInfo.device;
         details['Fingerprint'] = androidInfo.fingerprint;
-        details['Fisik'] = androidInfo.isPhysicalDevice ? 'Ya' : 'Bukan (Virtual/Emulator)';
+        details['Fisik'] = androidInfo.isPhysicalDevice
+            ? 'Ya'
+            : 'Bukan (Virtual/Emulator)';
       } else if (Platform.isIOS) {
         final iosInfo = await deviceInfo.iosInfo;
         details['Model'] = iosInfo.model;
         details['Nama Perangkat'] = iosInfo.name;
         details['Sistem'] = '${iosInfo.systemName} ${iosInfo.systemVersion}';
         details['Arsitektur'] = iosInfo.utsname.machine;
-        details['Fisik'] = iosInfo.isPhysicalDevice ? 'Ya' : 'Bukan (iOS Simulator)';
+        details['Fisik'] = iosInfo.isPhysicalDevice
+            ? 'Ya'
+            : 'Bukan (iOS Simulator)';
       }
     } catch (e) {
       debugPrint('Error fetching device details for security violation: $e');
@@ -110,8 +116,9 @@ class EnvironmentSecurityService {
     try {
       bool isJailBroken = false;
       try {
-        isJailBroken = await SafeDevice.isJailBroken
-            .timeout(const Duration(seconds: 2));
+        isJailBroken = await SafeDevice.isJailBroken.timeout(
+          const Duration(seconds: 2),
+        );
       } catch (e) {
         debugPrint('SafeDevice.isJailBroken error: $e');
       }
@@ -124,8 +131,9 @@ class EnvironmentSecurityService {
 
       bool isRealDevice = true;
       try {
-        isRealDevice = await SafeDevice.isRealDevice
-            .timeout(const Duration(seconds: 2));
+        isRealDevice = await SafeDevice.isRealDevice.timeout(
+          const Duration(seconds: 2),
+        );
       } catch (e) {
         debugPrint('SafeDevice.isRealDevice error: $e');
       }
@@ -133,8 +141,9 @@ class EnvironmentSecurityService {
       bool isDevMode = false;
       if (Platform.isAndroid) {
         try {
-          isDevMode = await SafeDevice.isDevelopmentModeEnable
-              .timeout(const Duration(seconds: 2));
+          isDevMode = await SafeDevice.isDevelopmentModeEnable.timeout(
+            const Duration(seconds: 2),
+          );
         } catch (e) {
           debugPrint('SafeDevice.isDevelopmentModeEnable error: $e');
         }
@@ -143,8 +152,9 @@ class EnvironmentSecurityService {
       bool isMockLocation = false;
       if (Platform.isAndroid) {
         try {
-          isMockLocation = await SafeDevice.isMockLocation
-              .timeout(const Duration(seconds: 2));
+          isMockLocation = await SafeDevice.isMockLocation.timeout(
+            const Duration(seconds: 2),
+          );
         } catch (e) {
           debugPrint('SafeDevice.isMockLocation error: $e');
         }
@@ -152,8 +162,9 @@ class EnvironmentSecurityService {
 
       bool isSecurityPlusEmulator = false;
       try {
-        isSecurityPlusEmulator = await SecurityPlus.isEmulator
-            .timeout(const Duration(seconds: 2));
+        isSecurityPlusEmulator = await SecurityPlus.isEmulator.timeout(
+          const Duration(seconds: 2),
+        );
       } catch (_) {}
 
       bool nativeEmulator = false;
@@ -182,28 +193,41 @@ class EnvironmentSecurityService {
       debugPrint('Device Details: $deviceDetails');
 
       if (isJailBroken) {
-        debugPrint('⚠️ Log Warning: Perangkat ter-Root/Jailbreak (Data dikirim via GPS Snapshot).');
+        debugPrint(
+          '⚠️ Log Warning: Perangkat ter-Root/Jailbreak (Data dikirim via GPS Snapshot).',
+        );
       }
 
       if (isDevMode) {
-        debugPrint('⚠️ Log Warning: Developer Mode / USB Debugging aktif (Data dikirim via GPS Snapshot).');
+        debugPrint(
+          '⚠️ Log Warning: Developer Mode / USB Debugging aktif (Data dikirim via GPS Snapshot).',
+        );
       }
 
       if (isMockLocation) {
-        debugPrint('⚠️ Log Warning: Mock Location / Fake GPS terdeteksi (Data dikirim via GPS Snapshot).');
+        debugPrint(
+          '⚠️ Log Warning: Mock Location / Fake GPS terdeteksi (Data dikirim via GPS Snapshot).',
+        );
       }
 
       if (isEmulator) {
-        debugPrint('⛔ Access Denied: Perangkat terdeteksi Emulator (Bukan Real Device).');
+        debugPrint(
+          '⛔ Access Denied: Perangkat terdeteksi Emulator (Bukan Real Device).',
+        );
       }
 
       if (isFridaDetected) {
-        debugPrint('⛔ Access Denied: Terdeteksi Frida / Instrumentation / Debugger!');
+        debugPrint(
+          '⛔ Access Denied: Terdeteksi Frida / Instrumentation / Debugger!',
+        );
       }
 
-      // Aplikasi diblokir (isSecure = false) jika terdeteksi Emulator atau Frida Instrumentation pada mode Release.
-      // Pada kDebugMode (saat flutter run / development), bebaskan pemblokiran emulator agar pengembang dapat bekerja.
-      final bool isSecure = kDebugMode ? true : (!isEmulator && !isFridaDetected);
+      final bool isSecure =
+          !isEmulator &&
+          !isFridaDetected &&
+          !isJailBroken &&
+          !isDevMode &&
+          !isMockLocation;
 
       return EnvironmentAuditResult(
         isSecure: isSecure,
@@ -234,4 +258,3 @@ class EnvironmentSecurityService {
     return result.isSecure;
   }
 }
-
