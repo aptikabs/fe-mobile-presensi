@@ -159,8 +159,31 @@ class _SplashPageState extends State<SplashPage> with WidgetsBindingObserver {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Logo
-                Image.asset('assets/logo/logo_v3.png', width: 150),
+                Image.asset('assets/logo/logo_app_launcher.webp', width: 200),
+                const SizedBox(height: 20),
 
+                const Text(
+                  'MEMBARA',
+                  style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+
+                const SizedBox(height: 6),
+
+                const SizedBox(
+                  width: 300,
+                  child: Text(
+                  'Manajemen Elektronik Monitoring Berbasis Absensi dan Rekam Aparatur',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
+                  ),  
+                ),
+              ),
                 // Show permission UI only if needed, otherwise just the splash
                 if (!_isChecking && !_permissionsGranted) ...[
                   const SizedBox(height: 32),
@@ -233,7 +256,7 @@ class _SplashPageState extends State<SplashPage> with WidgetsBindingObserver {
 
           // Branding at bottom
           Positioned(
-            bottom: 32,
+            bottom: 1,
             left: 0,
             right: 0,
             child: Column(
@@ -246,7 +269,7 @@ class _SplashPageState extends State<SplashPage> with WidgetsBindingObserver {
                   ),
                 ),
                 Center(
-                  child: Image.asset('assets/images/watermark.png', height: 80),
+                  child: Image.asset('assets/images/branding.webp', height: 150),
                 ),
               ],
             ),

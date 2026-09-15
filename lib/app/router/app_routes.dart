@@ -17,6 +17,7 @@ import '../../features/attendance/presentation/pages/attendance_page.dart';
 
 import '../../features/splash/presentation/pages/splash_page.dart';
 
+
 class AppRoutes {
   static final GoRouter router = GoRouter(
     initialLocation: AppRouteNames.splash,
