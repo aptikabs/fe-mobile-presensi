@@ -93,6 +93,15 @@ class AttendanceLoaded extends AttendanceState {
 
 class AttendanceCameraPermissionRequired extends AttendanceState {}
 
+class AttendanceSecurityBlocked extends AttendanceState {
+  final String message;
+
+  const AttendanceSecurityBlocked(this.message);
+
+  @override
+  List<Object> get props => [message];
+}
+
 class AttendanceError extends AttendanceState {
   final String message;
 

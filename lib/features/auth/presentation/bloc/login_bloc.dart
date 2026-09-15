@@ -46,18 +46,6 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       ),
     );
 
-    // Initial Security Check
-    try {
-      final threats = await securityService.getSecurityThreats();
-      if (threats.isNotEmpty) {
-        emit(
-          state.copyWith(
-            status: LoginStatus.securityFailure,
-            securityThreats: threats,
-          ),
-        );
-      }
-    } catch (_) {}
   }
 
   Future<void> _onSubmitted(

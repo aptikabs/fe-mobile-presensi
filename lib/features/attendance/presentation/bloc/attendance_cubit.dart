@@ -2,16 +2,19 @@ import 'dart:async';
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:safe_device/safe_device.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import '../../../../core/utils/location_utils.dart';
 
 import '../../../../core/services/gps_snapshot_service.dart';
 import '../../../../core/services/face_recognition_service.dart';
+import '../../../../core/security/environment_security_service.dart';
 
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../../core/error/failures.dart';
@@ -45,9 +48,6 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     emit(AttendanceLoading());
 
     try {
-      // Load Face Recognition Model
-      await faceRecognitionService.loadModel();
-
       // Check location permission first
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
@@ -66,6 +66,35 @@ class AttendanceCubit extends Cubit<AttendanceState> {
         emit(AttendancePermissionRequired());
         return;
       }
+
+      final securityAudit = await EnvironmentSecurityService.auditEnvironment();
+      if (!securityAudit.isSecure) {
+        final reasons = <String>[];
+        if (securityAudit.isMockLocation) {
+          reasons.add('mock location atau GPS palsu');
+        }
+        if (securityAudit.isDevMode) {
+          reasons.add('Developer Mode/USB Debugging');
+        }
+        if (securityAudit.isJailBroken) {
+          reasons.add('root/jailbreak');
+        }
+        if (securityAudit.isEmulator) reasons.add('emulator');
+        if (securityAudit.isFridaDetected) {
+          reasons.add('instrumentasi tidak tepercaya');
+        }
+
+        emit(
+          AttendanceSecurityBlocked(
+            'Akses fitur absen diblokir karena terdeteksi: '
+            '${reasons.join(', ')}. Matikan indikator tersebut lalu coba lagi.',
+          ),
+        );
+        return;
+      }
+
+      // Load Face Recognition Model
+      await faceRecognitionService.loadModel();
 
       await _loadMapData();
     } catch (e) {
@@ -123,6 +152,28 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     if (state is! AttendanceLoaded) return;
     final loadedState = state as AttendanceLoaded;
 
+    // Fake GPS can be enabled after the initial environment audit.
+    if (kReleaseMode && loadedState.currentPosition != null) {
+      bool isMockLocation = loadedState.currentPosition!.isMocked;
+      try {
+        isMockLocation = isMockLocation || await SafeDevice.isMockLocation;
+      } catch (e) {
+        debugPrint('Mock location check failed: $e');
+        isMockLocation = true;
+      }
+
+      if (isMockLocation) {
+        emit(
+          loadedState.copyWith(
+            isSubmitting: false,
+            submissionErrorMessage:
+                'Presensi ditolak karena lokasi palsu atau mock location terdeteksi.',
+          ),
+        );
+        return;
+      }
+    }
+
     // Emit submitting state
     emit(
       loadedState.copyWith(
@@ -164,14 +215,21 @@ class AttendanceCubit extends Cubit<AttendanceState> {
         );
         faceRecognitionStr = embedding.toString();
       } catch (e) {
-        debugPrint('Wajah gagal diproses atau model tidak tersedia: $e. Melanjutkan tanpa face recognition.');
+        debugPrint(
+          'Wajah gagal diproses atau model tidak tersedia: $e. Melanjutkan tanpa face recognition.',
+        );
       }
 
       final pos = loadedState.currentPosition;
       final String accuracyStr = pos?.accuracy.toString() ?? '0';
-      final String providerStr = gpsSnapshot['source']?['provider']?.toString() ?? 'fused';
-      final String timestampDeviceStr = (pos?.timestamp.millisecondsSinceEpoch ?? DateTime.now().millisecondsSinceEpoch).toString();
-      final String isMockLocStr = (gpsSnapshot['device_state']?['is_mock_location'] == true).toString();
+      final String providerStr =
+          gpsSnapshot['source']?['provider']?.toString() ?? 'fused';
+      final String timestampDeviceStr =
+          (pos?.timestamp.millisecondsSinceEpoch ??
+                  DateTime.now().millisecondsSinceEpoch)
+              .toString();
+      final String isMockLocStr =
+          (gpsSnapshot['device_state']?['is_mock_location'] == true).toString();
 
       final params = SubmitAttendanceParams(
         nip: user.detailPegawai.nip,

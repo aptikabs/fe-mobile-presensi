@@ -12,7 +12,10 @@ import 'package:http/io_client.dart';
 class PinnedHttpClient {
   /// SHA-256 hash sertifikat DER yang dihitung oleh verifyCertificate.
   static const List<String> allowedSha256Pins = [
-    'WT+/NYmOE4tylr2g1BqgoSHHiz2/qvFfS3iBMZehB/M=', // Certificate served to Dart/Flutter runtime
+    'WT+/NYmOE4tylr2g1BqgoSHHiz2/qvFfS3iBMZehB/M=',
+    'MQUyULNS33Kn7V0Q2AwbFQJi1nn7i/UqChTQQl4wxbQ=',
+    '70bOP4TfziAt+s1w7MrFVdHaHGYvFG7Mat4CMidxqls=',
+    'ByY50LFA1b/64WrZw/bMYIYEBiH1HuYabUaokVwHz3Y=',
   ];
 
   /// Daftar Host/Domain Backend yang Diizinkan
