@@ -71,3 +71,7 @@ flutter:
     - assets/audio/
     - assets/logo/
     - assets/mobile_face_net.tflite
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/logo/logo_launcher_new.png"

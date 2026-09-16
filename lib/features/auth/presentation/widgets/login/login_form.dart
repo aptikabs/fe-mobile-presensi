@@ -100,7 +100,7 @@ class _LoginFormState extends State<LoginForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Username',
+            'NIP',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
@@ -111,7 +111,7 @@ class _LoginFormState extends State<LoginForm> {
           TextFormField(
             controller: _usernameController,
             decoration: InputDecoration(
-              hintText: 'Masukkan username',
+              hintText: 'Masukkan NIP',
               prefixIcon: const Icon(
                 Icons.person_outline,
                 color: AppColors.neutral500,
@@ -143,7 +143,7 @@ class _LoginFormState extends State<LoginForm> {
             ),
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Username tidak boleh kosong';
+                return 'NIP tidak boleh kosong';
               }
               return null;
             },
