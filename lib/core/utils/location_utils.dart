@@ -40,7 +40,7 @@ class LocationUtils {
     return 12742 * asin(sqrt(a)) * 1000;
   }
 
-  /// Check if a point is within a circular radius (fallback 20m)
+  /// Check if a point is within the configured circular radius
   static bool isWithinRadius(
     LatLng point,
     LatLng center,

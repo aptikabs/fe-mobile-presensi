@@ -29,6 +29,7 @@ abstract class AuthRemoteDataSource {
     required String model,
     required String fingerprint,
     required String imagePath,
+    required List<double> faceEmbedding,
   });
 
   Future<void> checkUserBlock(String nip);
@@ -45,7 +46,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     if (data['error'] != null && data['error'].toString().trim().isNotEmpty) {
       return data['error'].toString().trim();
     }
-    if (data['message'] != null && data['message'].toString().trim().isNotEmpty) {
+    if (data['message'] != null &&
+        data['message'].toString().trim().isNotEmpty) {
       return data['message'].toString().trim();
     }
     if (data['errors'] != null) {
@@ -59,7 +61,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
             return firstVal.toString();
           }
         }
-      } else if (data['errors'] is List && (data['errors'] as List).isNotEmpty) {
+      } else if (data['errors'] is List &&
+          (data['errors'] as List).isNotEmpty) {
         return (data['errors'] as List).first.toString();
       }
     }
@@ -126,7 +129,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       // Explicitly handle HTTP 403 Forbidden (Device Mismatch / Cek Perangkat failure)
       if (response.statusCode == 403) {
-        final String msg = _extractErrorMessage(data) ??
+        final String msg =
+            _extractErrorMessage(data) ??
             'Device berbeda atau telah mengalami pembaruan kode unik.';
 
         if (data != null && data.containsKey('kode')) {
@@ -148,8 +152,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           final int kode = (data['kode'] is int)
               ? data['kode']
               : (int.tryParse(data['kode'].toString()) ?? -1);
-          final String msg =
-              _extractErrorMessage(data) ?? 'Respon dari server';
+          final String msg = _extractErrorMessage(data) ?? 'Respon dari server';
           switch (kode) {
             case 0:
               if (response.statusCode == 200) {
@@ -305,7 +308,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } on AuthException {
       rethrow;
     } catch (e) {
-      throw ChangeDeviceFailedException('Gagal mengubah perangkat. Silakan coba lagi.');
+      throw ChangeDeviceFailedException(
+        'Gagal mengubah perangkat. Silakan coba lagi.',
+      );
     }
   }
 
@@ -317,6 +322,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String model,
     required String fingerprint,
     required String imagePath,
+    required List<double> faceEmbedding,
   }) async {
     final url = Uri.parse(Urls.daftarPerangkat);
     final request = http.MultipartRequest('POST', url);
@@ -327,7 +333,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       'merek': merek,
       'model': model,
       'fingerprint': fingerprint,
-      'face_recognition': '[]',
+      'face_recognition': jsonEncode(faceEmbedding),
     });
 
     if (imagePath.isNotEmpty) {

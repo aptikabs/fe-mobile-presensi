@@ -281,12 +281,18 @@ class HomePage extends StatelessWidget {
     String jadwalPulang = '-';
 
     if (user.result.jadwalAbsen != null) {
-      jadwalMasuk = DateFormat.Hm().format(
-        DateFormat('HH:mm:ss').parse(user.result.jadwalAbsen!.masukBatas),
-      );
-      jadwalPulang = DateFormat.Hm().format(
-        DateFormat('HH:mm:ss').parse(user.result.jadwalAbsen!.pulangJam),
-      );
+      final schedule = user.result.jadwalAbsen!;
+      if (schedule.tipe.trim().toLowerCase() == 'lbr') {
+        jadwalMasuk = 'Libur';
+        jadwalPulang = 'Libur';
+      } else {
+        jadwalMasuk = DateFormat.Hm().format(
+          DateFormat('HH:mm:ss').parse(schedule.masukBatas),
+        );
+        jadwalPulang = DateFormat.Hm().format(
+          DateFormat('HH:mm:ss').parse(schedule.pulangJam),
+        );
+      }
     }
 
     return Container(

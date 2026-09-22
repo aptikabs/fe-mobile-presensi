@@ -7,20 +7,20 @@ import 'package:hive/hive.dart';
 /// menggunakan Hardware-backed Storage (Android Keystore / iOS Keychain).
 class SecureStorageService {
   static const String _hiveKeyAlias = 'hive_encryption_key_v1';
+  static const String faceEmbeddingKey = 'registered_face_embedding_v1';
 
   final FlutterSecureStorage _storage;
 
   SecureStorageService({FlutterSecureStorage? storage})
-      : _storage = storage ??
-            const FlutterSecureStorage(
-              aOptions: AndroidOptions(
-                encryptedSharedPreferences: true,
-              ),
-              iOptions: IOSOptions(
-                accessibility: KeychainAccessibility.first_unlock,
-                synchronizable: false,
-              ),
-            );
+    : _storage =
+          storage ??
+          const FlutterSecureStorage(
+            aOptions: AndroidOptions(encryptedSharedPreferences: true),
+            iOptions: IOSOptions(
+              accessibility: KeychainAccessibility.first_unlock,
+              synchronizable: false,
+            ),
+          );
 
   /// Mengambil atau membuat Encryption Key 256-bit (32 bytes) baru untuk Hive AES Cipher.
   /// Kunci disimpan di KeyStore/Keychain dalam format Base64.
@@ -46,7 +46,10 @@ class SecureStorageService {
       // Jika terjadi kesalahan akses Keystore/Keychain, re-generate key aman
       final fallbackKey = Hive.generateSecureKey();
       try {
-        await _storage.write(key: _hiveKeyAlias, value: base64Encode(fallbackKey));
+        await _storage.write(
+          key: _hiveKeyAlias,
+          value: base64Encode(fallbackKey),
+        );
       } catch (_) {}
       return fallbackKey;
     }
@@ -68,5 +71,17 @@ class SecureStorageService {
     } catch (e) {
       debugPrint('Error clearing SecureStorage: $e');
     }
+  }
+
+  Future<void> saveFaceEmbedding(String value) async {
+    await _storage.write(key: faceEmbeddingKey, value: value);
+  }
+
+  Future<String?> readFaceEmbedding() async {
+    return _storage.read(key: faceEmbeddingKey);
+  }
+
+  Future<void> deleteFaceEmbedding() async {
+    await _storage.delete(key: faceEmbeddingKey);
   }
 }

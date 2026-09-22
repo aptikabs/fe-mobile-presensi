@@ -209,6 +209,7 @@ Aplikasi mobile mengimplementasikan **SSL SPKI Public Key Pinning (SHA-256)** vi
 | `daftar_kordinat[].latitude` | String | Latitude pusat |
 | `daftar_kordinat[].longitude` | String | Longitude pusat |
 | `daftar_kordinat[].alamat` | String | Alamat |
+| `daftar_kordinat[].radius_meter` | int/float | Radius zona absen dalam meter |
 | `daftar_kordinat[].polygon_points[]` | List | Titik-titik polygon area |
 | `polygon_points[].latitude` | String | Lat titik polygon |
 | `polygon_points[].longitude` | String | Lng titik polygon |

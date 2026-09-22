@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:epresensi_mobile/core/utils/device_utils.dart';
+import 'package:epresensi_mobile/core/security/secure_storage_service.dart';
 import '../../../data/datasources/auth_local_data_source.dart';
 import '../../../domain/entities/user_entity.dart';
 import '../../../domain/repositories/auth_repository.dart';
@@ -27,10 +28,12 @@ class AuthUnauthenticated extends AuthState {}
 class AuthCubit extends Cubit<AuthState> {
   final AuthLocalDataSource localDataSource;
   final AuthRepository? authRepository;
+  final SecureStorageService? secureStorageService;
 
   AuthCubit({
     required this.localDataSource,
     this.authRepository,
+    this.secureStorageService,
   }) : super(AuthInitial());
 
   Future<void> checkAuthStatus() async {
@@ -52,6 +55,7 @@ class AuthCubit extends Cubit<AuthState> {
 
   Future<void> logout() async {
     await localDataSource.clearUser();
+    await secureStorageService?.deleteFaceEmbedding();
     emit(AuthUnauthenticated());
   }
 
@@ -62,7 +66,10 @@ class AuthCubit extends Cubit<AuthState> {
       String? username = hiveCredentials?['username'];
       String? password = hiveCredentials?['password'];
 
-      if (username == null || username.isEmpty || password == null || password.isEmpty) {
+      if (username == null ||
+          username.isEmpty ||
+          password == null ||
+          password.isEmpty) {
         final prefs = await SharedPreferences.getInstance();
         username = prefs.getString('username');
         password = prefs.getString('password');
@@ -86,7 +93,10 @@ class AuthCubit extends Cubit<AuthState> {
       String? username = hiveCredentials?['username'];
       String? password = hiveCredentials?['password'];
 
-      if (username == null || username.isEmpty || password == null || password.isEmpty) {
+      if (username == null ||
+          username.isEmpty ||
+          password == null ||
+          password.isEmpty) {
         final prefs = await SharedPreferences.getInstance();
         username = prefs.getString('username');
         password = prefs.getString('password');

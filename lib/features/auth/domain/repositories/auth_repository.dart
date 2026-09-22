@@ -22,6 +22,7 @@ abstract class AuthRepository {
     required String model,
     required String fingerprint,
     required String imagePath,
+    required List<double> faceEmbedding,
   });
 
   Future<void> checkUserBlock(String nip);
