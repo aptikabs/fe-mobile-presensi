@@ -70,11 +70,11 @@ class _AboutPageState extends State<AboutPage> {
                     ),
                   ],
                 ),
-                child: Image.asset('assets/logo/logo.png', fit: BoxFit.contain),
+                child: Image.asset('assets/logo/logo_v3.webp', fit: BoxFit.contain),
               ),
               const SizedBox(height: 24),
               const Text(
-                'Membara Mobile Mobile',
+                'Membara Mobile',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -110,10 +110,10 @@ class _AboutPageState extends State<AboutPage> {
                 ),
               ),
               const SizedBox(height: 32),
-              Image.asset('assets/logo/logo_kab_bs_text.png', width: 200),
+              Image.asset('assets/logo/branding.webp', width: 200),
               const SizedBox(height: 16),
               Text(
-                '© $_year Pemerintah Provinsi Bengkulu',
+                '© $_year Pemerintah Kabupaten Bengkulu Selatan',
                 style: TextStyle(fontSize: 12, color: AppColors.neutral400),
               ),
             ],
