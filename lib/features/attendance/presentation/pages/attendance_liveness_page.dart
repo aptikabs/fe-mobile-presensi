@@ -16,9 +16,17 @@ import '../bloc/attendance_state.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 enum LivenessStep { start, blink, smile, processing, captured }
+enum LivenessPurpose { attendance, deviceRegistration }
 
 class AttendanceLivenessPage extends StatefulWidget {
-  const AttendanceLivenessPage({super.key});
+  final LivenessPurpose purpose;
+  final Future<void> Function(XFile image)? onCaptured;
+
+  const AttendanceLivenessPage({
+    super.key,
+    this.purpose = LivenessPurpose.attendance,
+    this.onCaptured,
+  });
 
   @override
   State<AttendanceLivenessPage> createState() => _AttendanceLivenessPageState();
@@ -38,8 +46,8 @@ class _AttendanceLivenessPageState extends State<AttendanceLivenessPage>
   String _instructionText = "Posisikan wajah di area scanner";
 
   // Debouncing
-  int _consecutiveBlinks = 0;
   int _consecutiveSmiles = 0;
+  bool _blinkClosedDetected = false;
 
   // Animation
   late AnimationController _scanController;
@@ -194,19 +202,18 @@ class _AttendanceLivenessPageState extends State<AttendanceLivenessPage>
       final leftOpen = face.leftEyeOpenProbability ?? 1.0;
       final rightOpen = face.rightEyeOpenProbability ?? 1.0;
 
-      // Threshold raised to 0.35 (easier to detect blink)
       if (leftOpen < 0.35 || rightOpen < 0.35) {
-        _consecutiveBlinks++;
-        // Reduced to > 0 for faster response (2 consecutive frames)
-        if (_consecutiveBlinks > 0) {
-          setState(() {
-            _currentStep = LivenessStep.smile;
-            _instructionText = "Langkah 2: Silakan Tersenyum";
-            _playAudio('audio/senyum.MP3');
-          });
-        }
-      } else {
-        _consecutiveBlinks = 0;
+        _blinkClosedDetected = true;
+        return;
+      }
+
+      if (_blinkClosedDetected) {
+        _blinkClosedDetected = false;
+        setState(() {
+          _currentStep = LivenessStep.smile;
+          _instructionText = "Langkah 2: Silakan Tersenyum";
+          _playAudio('audio/senyum.MP3');
+        });
       }
     } else if (_currentStep == LivenessStep.smile) {
       final smileProb = face.smilingProbability ?? 0.0;
@@ -254,8 +261,8 @@ class _AttendanceLivenessPageState extends State<AttendanceLivenessPage>
   Future<void> _restart() async {
     _currentStep = LivenessStep.start;
     _capturedImage = null;
-    _consecutiveBlinks = 0;
     _consecutiveSmiles = 0;
+    _blinkClosedDetected = false;
 
     // Reset Audio
     await _audioPlayer.stop();
@@ -270,10 +277,26 @@ class _AttendanceLivenessPageState extends State<AttendanceLivenessPage>
     setState(() {});
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     _audioPlayer.stop();
     if (_capturedImage == null) return;
-    context.read<AttendanceCubit>().submitAttendanceWithImage(_capturedImage!);
+    if (widget.purpose == LivenessPurpose.deviceRegistration) {
+      final callback = widget.onCaptured;
+      if (callback == null) {
+        CustomToast.show(
+          context,
+          'Proses pendaftaran perangkat tidak tersedia.',
+          isError: true,
+        );
+        return;
+      }
+      await callback(_capturedImage!);
+      if (mounted) Navigator.of(context).pop();
+    } else {
+      await context.read<AttendanceCubit>().submitAttendanceWithImage(
+        _capturedImage!,
+      );
+    }
   }
 
   Future<void> _playAudio(String path) async {
@@ -422,62 +445,65 @@ class _AttendanceLivenessPageState extends State<AttendanceLivenessPage>
     return Scaffold(
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: BlocConsumer<AttendanceCubit, AttendanceState>(
-          listener: (context, state) {
-            if (state is AttendanceLoaded) {
-              if (state.submissionErrorMessage != null) {
-                CustomToast.show(
-                  context,
-                  state.submissionErrorMessage!,
-                  isError: true,
-                );
-              }
-              if (state.submissionSuccessMessage != null) {
-                CustomToast.show(
-                  context,
-                  "Presensi Berhasil Recorded",
-                  isError: false,
-                );
-                // Pop until the first route (usually Dashboard/Home)
-                Navigator.of(context).popUntil((route) => route.isFirst);
-              }
-            }
-          },
-          builder: (context, state) {
-            final isSubmitting =
-                state is AttendanceLoaded && state.isSubmitting;
-
-            if (_currentStep == LivenessStep.captured &&
-                _capturedImage != null) {
-              return _buildReviewUI(isSubmitting);
-            }
-
-            if (!_isCameraInitialized) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            return Stack(
-              fit: StackFit.expand,
-              children: [
-                CameraPreview(_controller!),
-                _buildModernOverlay(),
-                _buildBottomCard(),
-                // Back Button
-                Positioned(
-                  top: 20,
-                  left: 20,
-                  child: FloatingActionButton.small(
-                    backgroundColor: Colors.white24,
-                    elevation: 0,
-                    onPressed: () => Navigator.pop(context),
-                    child: const Icon(Icons.arrow_back, color: Colors.white),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
+        child: widget.purpose == LivenessPurpose.attendance
+            ? BlocConsumer<AttendanceCubit, AttendanceState>(
+                listener: (context, state) {
+                  if (state is AttendanceLoaded) {
+                    if (state.submissionErrorMessage != null) {
+                      CustomToast.show(
+                        context,
+                        state.submissionErrorMessage!,
+                        isError: true,
+                      );
+                    }
+                    if (state.submissionSuccessMessage != null) {
+                      CustomToast.show(
+                        context,
+                        "Presensi Berhasil Recorded",
+                        isError: false,
+                      );
+                      // Pop until the first route (usually Dashboard/Home)
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    }
+                  }
+                },
+                builder: (context, state) {
+                  final isSubmitting =
+                      state is AttendanceLoaded && state.isSubmitting;
+                  return _buildLivenessBody(isSubmitting: isSubmitting);
+                },
+              )
+            : _buildLivenessBody(),
       ),
+    );
+  }
+
+  Widget _buildLivenessBody({bool isSubmitting = false}) {
+    if (_currentStep == LivenessStep.captured && _capturedImage != null) {
+      return _buildReviewUI(isSubmitting);
+    }
+
+    if (!_isCameraInitialized) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        CameraPreview(_controller!),
+        _buildModernOverlay(),
+        _buildBottomCard(),
+        Positioned(
+          top: 20,
+          left: 20,
+          child: FloatingActionButton.small(
+            backgroundColor: Colors.white24,
+            elevation: 0,
+            onPressed: () => Navigator.pop(context),
+            child: const Icon(Icons.arrow_back, color: Colors.white),
+          ),
+        ),
+      ],
     );
   }
 
@@ -730,8 +756,10 @@ class _AttendanceLivenessPageState extends State<AttendanceLivenessPage>
                                 strokeWidth: 2,
                               ),
                             )
-                          : const Text(
-                              "Kirim Absen",
+                            : Text(
+                              widget.purpose == LivenessPurpose.deviceRegistration
+                                ? "Daftarkan Perangkat"
+                                : "Kirim Absen",
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,

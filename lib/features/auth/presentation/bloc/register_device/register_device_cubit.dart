@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../../../core/security/secure_storage_service.dart';
+import '../../../../../../core/services/face_recognition_service.dart';
 import '../../../../../../core/utils/device_utils.dart';
 import '../../../domain/usecases/register_device_usecase.dart';
 import 'register_device_state.dart';
@@ -10,9 +14,18 @@ enum FaceRecognitionMode { low, medium, high }
 class RegisterDeviceCubit extends Cubit<RegisterDeviceState> {
   final RegisterDeviceUseCase registerDeviceUseCase;
   final String nip;
+  final FaceRecognitionService faceRecognitionService;
+  final SecureStorageService secureStorageService;
 
-  RegisterDeviceCubit({required this.registerDeviceUseCase, required this.nip})
-    : super(const RegisterDeviceState());
+  RegisterDeviceCubit({
+    required this.registerDeviceUseCase,
+    required this.nip,
+    FaceRecognitionService? faceRecognitionService,
+    SecureStorageService? secureStorageService,
+  }) : faceRecognitionService =
+           faceRecognitionService ?? FaceRecognitionService(),
+       secureStorageService = secureStorageService ?? SecureStorageService(),
+       super(const RegisterDeviceState());
 
   Future<void> submit({
     required XFile image,
@@ -24,6 +37,9 @@ class RegisterDeviceCubit extends Cubit<RegisterDeviceState> {
 
     try {
       final deviceInfo = await DeviceUtils.getDeviceInfo();
+      final embedding = await faceRecognitionService.generateEmbedding(
+        image.path,
+      );
 
       await registerDeviceUseCase(
         nip: nip,
@@ -32,7 +48,9 @@ class RegisterDeviceCubit extends Cubit<RegisterDeviceState> {
         model: deviceInfo['model'] ?? '',
         fingerprint: deviceInfo['fingerprint'] ?? '',
         imagePath: image.path,
+        faceEmbedding: embedding,
       );
+      await secureStorageService.saveFaceEmbedding(jsonEncode(embedding));
 
       if (isClosed) return;
 

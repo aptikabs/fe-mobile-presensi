@@ -28,6 +28,7 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
     required String timestampDevice,
     required String isMockLocation,
     required String jarak,
+    required String radius,
     required String merek,
     required String model,
     required String imagePath,
@@ -36,9 +37,11 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
     required String token,
   }) async {
     if (!await networkInfo.isConnected) {
-      return const Left(NetworkFailure(
-        'Tidak ada koneksi internet. Periksa jaringan Anda dan coba lagi.',
-      ));
+      return const Left(
+        NetworkFailure(
+          'Tidak ada koneksi internet. Periksa jaringan Anda dan coba lagi.',
+        ),
+      );
     }
 
     try {
@@ -55,6 +58,7 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
         timestampDevice: timestampDevice,
         isMockLocation: isMockLocation,
         jarak: jarak,
+        radius: radius,
         merek: merek,
         model: model,
         imagePath: imagePath,
@@ -70,12 +74,14 @@ class AttendanceRepositoryImpl implements AttendanceRepository {
       if (kode == 0) {
         return const Right('Absensi Berhasil');
       } else if (kode == -1) {
-        final String msg = result['error']?.toString() ??
+        final String msg =
+            result['error']?.toString() ??
             result['message']?.toString() ??
             'Wajah tidak sesuai database. Silakan coba lagi.';
         return Left(ServerFailure(msg));
       } else {
-        final String msg = result['error']?.toString() ??
+        final String msg =
+            result['error']?.toString() ??
             result['message']?.toString() ??
             'Gagal melakukan absensi (Kode $kode)';
         return Left(ServerFailure(msg));

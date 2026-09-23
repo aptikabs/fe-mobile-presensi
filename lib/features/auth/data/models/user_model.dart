@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../../domain/entities/attendance_schedule.dart';
 import '../../domain/entities/coordinate.dart';
 import '../../domain/entities/employee_detail.dart';
@@ -36,8 +38,8 @@ class UserModel extends UserEntity {
           : '',
       unorIndukNama:
           (detailJson['unor_induk'] != null && detailJson['unor_induk'] is Map)
-              ? detailJson['unor_induk']['nama_unor']?.toString() ?? ''
-              : '',
+          ? detailJson['unor_induk']['nama_unor']?.toString() ?? ''
+          : '',
       unorId: (detailJson['unor'] != null && detailJson['unor'] is Map)
           ? detailJson['unor']['id']?.toString() ?? ''
           : '',
@@ -78,6 +80,9 @@ class UserModel extends UserEntity {
               latitude: item['latitude']?.toString() ?? '',
               longitude: item['longitude']?.toString() ?? '',
               alamat: item['alamat']?.toString() ?? '',
+                radiusMeter:
+                  double.tryParse(item['radius_meter']?.toString() ?? '') ??
+                  20,
               polygonPoints: polygonPoints,
             ),
           );
@@ -85,12 +90,24 @@ class UserModel extends UserEntity {
       }
     }
 
-    // Parse LoginResult
-    final resultJson = json['hasil_login'] is Map ? json['hasil_login'] : {};
+    // Parse LoginResult. Some login responses wrap hasil_login in data.
+    final dataJson = json['data'] is Map
+      ? Map<String, dynamic>.from(json['data'] as Map)
+      : <String, dynamic>{};
+    final resultJson = json['hasil_login'] is Map
+      ? Map<String, dynamic>.from(json['hasil_login'] as Map)
+      : dataJson['hasil_login'] is Map
+      ? Map<String, dynamic>.from(dataJson['hasil_login'] as Map)
+      : dataJson.isNotEmpty
+      ? dataJson
+      : <String, dynamic>{};
     AttendanceSchedule? schedule;
-    if (resultJson['jadwal_absen'] != null &&
-        resultJson['jadwal_absen'] is Map) {
-      final scheduleJson = resultJson['jadwal_absen'];
+    final scheduleJson = resultJson['jadwal_absen'] is Map
+      ? resultJson['jadwal_absen']
+      : json['jadwal_absen'] is Map
+      ? json['jadwal_absen']
+      : null;
+    if (scheduleJson is Map) {
       schedule = AttendanceSchedule(
         id: scheduleJson['id'] is int
             ? scheduleJson['id']
@@ -123,11 +140,12 @@ class UserModel extends UserEntity {
         ? json['wfa_status']
         : (int.tryParse(json['wfa_status']?.toString() ?? '') ?? 0);
 
-    final String? extractedToken = (json['token'] ??
-            json['hasil_login']?['token'] ??
-            json['access_token'] ??
-            json['data']?['token'])
-        ?.toString();
+    final String? extractedToken =
+        (json['token'] ??
+                json['hasil_login']?['token'] ??
+                json['access_token'] ??
+                json['data']?['token'])
+            ?.toString();
 
     return UserModel(
       detailPegawai: detail,
@@ -137,11 +155,26 @@ class UserModel extends UserEntity {
       kodeUnik: json['kode_unik']?.toString() ?? '',
       wfaStatus: wfaStatus,
       token: extractedToken,
-      faceRecognition: json['face_recognition'] is List
-          ? json['face_recognition'] as List
-          : null,
+      faceRecognition: _parseFaceRecognition(
+        json['face_recognition'] ??
+            (json['data'] is Map ? json['data']['face_recognition'] : null) ??
+            (json['hasil_login'] is Map
+                ? json['hasil_login']['face_recognition']
+                : null),
+      ),
       rawJson: json,
     );
+  }
+
+  static List<dynamic>? _parseFaceRecognition(dynamic value) {
+    if (value is List) return List<dynamic>.from(value);
+    if (value is String && value.trim().isNotEmpty) {
+      try {
+        final decoded = jsonDecode(value);
+        if (decoded is List) return List<dynamic>.from(decoded);
+      } catch (_) {}
+    }
+    return null;
   }
 
   UserModel copyWithToken(String newToken) {
@@ -186,6 +219,7 @@ class UserModel extends UserEntity {
                     'latitude': c.latitude,
                     'longitude': c.longitude,
                     'alamat': c.alamat,
+                    'radius_meter': c.radiusMeter,
                     'polygon_points': c.polygonPoints
                         .map(
                           (p) => {

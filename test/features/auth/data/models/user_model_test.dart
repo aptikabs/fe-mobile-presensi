@@ -14,35 +14,30 @@ void main() {
           "golongan": {
             "nama": "III/d",
             "nama_pangkat": "Penata Tingkat I",
-            "tmt_golongan": "01-04-2015"
+            "tmt_golongan": "01-04-2015",
           },
-          "jenis_jabatan": {
-            "id": "4",
-            "nama": "FUNGSIONAL_UMUM"
-          },
+          "jenis_jabatan": {"id": "4", "nama": "FUNGSIONAL_UMUM"},
           "jabatan_id": "ff8080814b571e31014b5cb618c26447",
           "jabatan_nama": "Pengawas Teknologi Informasi",
           "tmt_jabatan": "04-01-2019",
-          "masa_kerja": {
-            "tahun": "23",
-            "bulan": "1"
-          },
+          "masa_kerja": {"tahun": "23", "bulan": "1"},
           "unor": {
             "id": "8ae4828859d211720159d5155505212f",
-            "nama_unor": "Seksi Pengembangan Aplikasi"
+            "nama_unor": "Seksi Pengembangan Aplikasi",
           },
           "unor_induk": {
             "id": "8ae4828859d211720159d50fe0eb1e67",
-            "nama_unor": "Dinas Komunikasi, Informatika dan Statistik Provinsi Bengkulu"
+            "nama_unor":
+                "Dinas Komunikasi, Informatika dan Statistik Provinsi Bengkulu",
           },
           "hukuman_disiplin": {
             "id": null,
             "tmt_hukuman_disiplin": null,
-            "tmt_akhir_hukuman_disiplin": null
+            "tmt_akhir_hukuman_disiplin": null,
           },
           "is_penyetaraan": null,
           "kedudukan_hukum_id": "99",
-          "kedudukan_hukum_nama": "Pensiun"
+          "kedudukan_hukum_nama": "Pensiun",
         },
         "kode": 0,
         "daftar_kordinat": [
@@ -52,7 +47,9 @@ void main() {
             "nama_tempat": "Fingerprint Dekat E-GOV",
             "latitude": "-3.792982",
             "longitude": "102.270556",
-            "alamat": "JL. Basuki Rahmat No. 06 Sawah Lebar Baru, Ratu Agung, Kota Bengkulu. 38223",
+            "radius_meter": 35,
+            "alamat":
+                "JL. Basuki Rahmat No. 06 Sawah Lebar Baru, Ratu Agung, Kota Bengkulu. 38223",
             "deskripsi": "",
             "disetujui": 1,
             "created_at": "2021-06-21T09:16:30.000000Z",
@@ -66,10 +63,10 @@ void main() {
                 "longitude": "102.27042204414505",
                 "urutan": 1,
                 "created_at": "2026-03-04T04:46:20.000000Z",
-                "updated_at": "2026-03-04T04:46:20.000000Z"
-              }
-            ]
-          }
+                "updated_at": "2026-03-04T04:46:20.000000Z",
+              },
+            ],
+          },
         ],
         "hasil_login": {
           "id": "3bbd703d-cc9f-447b-b9e2-569a2233bcf7",
@@ -88,13 +85,13 @@ void main() {
             "masuk_jam": "06:45:00",
             "masuk_batas": "07:45:00",
             "pulang_jam": "16:15:00",
-            "pulang_batas": "20:00:00"
-          }
+            "pulang_batas": "20:00:00",
+          },
         },
         "kode_unik": "12345",
         "face_recognition": [-0.021449, 0.02372],
         "wfa_status": 1,
-        "token": "eyJ0eX..."
+        "token": "eyJ0eX...",
       };
 
       final result = UserModel.fromJson(jsonResponse);
@@ -106,12 +103,16 @@ void main() {
       expect(result.detailPegawai.nip, '196512101987032009');
       expect(result.detailPegawai.nama, 'IRMA ARTATI, S.Sos');
       expect(result.detailPegawai.unorNama, 'Seksi Pengembangan Aplikasi');
-      expect(result.detailPegawai.unorIndukNama, 'Dinas Komunikasi, Informatika dan Statistik Provinsi Bengkulu');
+      expect(
+        result.detailPegawai.unorIndukNama,
+        'Dinas Komunikasi, Informatika dan Statistik Provinsi Bengkulu',
+      );
       expect(result.result.idMesin, 13217);
       expect(result.result.tipeAbsensi, 'A');
       expect(result.result.jadwalAbsen?.masukJam, '06:45:00');
       expect(result.daftarKordinat.length, 1);
       expect(result.daftarKordinat.first.namaTempat, 'Fingerprint Dekat E-GOV');
+      expect(result.daftarKordinat.first.radiusMeter, 35);
       expect(result.daftarKordinat.first.polygonPoints.length, 1);
       expect(result.daftarKordinat.first.polygonPoints.first.urutan, 1);
     });
@@ -125,21 +126,16 @@ void main() {
             "id": "3",
             "nama_tempat": "Fingerprint",
             "polygon_points": [
-              {
-                "id": "10",
-                "urutan": "2"
-              }
-            ]
-          }
+              {"id": "10", "urutan": "2"},
+            ],
+          },
         ],
         "hasil_login": {
           "id_mesin": "9999",
-          "jadwal_absen": {
-            "id": "5"
-          }
+          "jadwal_absen": {"id": "5"},
         },
         "kode_unik": 12345,
-        "wfa_status": "1"
+        "wfa_status": "1",
       };
 
       final result = UserModel.fromJson(jsonResponse);
@@ -154,33 +150,68 @@ void main() {
       expect(result.daftarKordinat.first.polygonPoints.first.urutan, 2);
     });
 
-    test('should extract token from nested fields if top-level token is null', () {
-      final jsonResponse = {
-        "kode": 0,
-        "hasil_login": {
-          "token": "token_in_hasil_login"
-        }
-      };
+    test(
+      'should extract token from nested fields if top-level token is null',
+      () {
+        final jsonResponse = {
+          "kode": 0,
+          "hasil_login": {"token": "token_in_hasil_login"},
+        };
 
-      final result = UserModel.fromJson(jsonResponse);
-      expect(result.token, 'token_in_hasil_login');
+        final result = UserModel.fromJson(jsonResponse);
+        expect(result.token, 'token_in_hasil_login');
+      },
+    );
+
+    test('should parse attendance schedule type for WFO, WFA, and LBR', () {
+      for (final type in ['wfo', 'wfa', 'LBR']) {
+        final result = UserModel.fromJson({
+          'hasil_login': {
+            'jadwal_absen': {'tipe': type},
+          },
+          'wfa_status': 1,
+        });
+
+        expect(result.result.jadwalAbsen?.tipe, type);
+      }
     });
 
-    test('toJson should preserve token even if initialized with rawJson lacking top-level token', () {
-      final dummyUser = UserModel.fromJson({});
-      final model = UserModel(
-        detailPegawai: dummyUser.detailPegawai,
-        kode: 0,
-        daftarKordinat: const [],
-        result: dummyUser.result,
-        kodeUnik: '123',
-        wfaStatus: 1,
-        token: 'my_custom_token',
-        rawJson: {'kode': 0},
-      );
+    test('should parse WFH schedule from the login response', () {
+      final result = UserModel.fromJson({
+        'hasil_login': {
+          'jadwal_absen': {
+            'id': 34,
+            'tipe': 'wfh',
+            'masuk_jam': '07:30:00',
+            'masuk_batas': '07:30:00',
+            'pulang_jam': '16:00:00',
+            'pulang_batas': '16:00:00',
+          },
+        },
+        'wfa_status': 0,
+      });
 
-      final jsonMap = model.toJson();
-      expect(jsonMap['token'], 'my_custom_token');
+      expect(result.result.jadwalAbsen?.tipe.trim().toLowerCase(), 'wfh');
     });
+
+    test(
+      'toJson should preserve token even if initialized with rawJson lacking top-level token',
+      () {
+        final dummyUser = UserModel.fromJson({});
+        final model = UserModel(
+          detailPegawai: dummyUser.detailPegawai,
+          kode: 0,
+          daftarKordinat: const [],
+          result: dummyUser.result,
+          kodeUnik: '123',
+          wfaStatus: 1,
+          token: 'my_custom_token',
+          rawJson: {'kode': 0},
+        );
+
+        final jsonMap = model.toJson();
+        expect(jsonMap['token'], 'my_custom_token');
+      },
+    );
   });
 }

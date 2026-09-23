@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import '../../../../core/utils/location_utils.dart';
 
 import '../../../../core/services/gps_snapshot_service.dart';
 import '../../../../core/services/face_recognition_service.dart';
+import '../../../../core/security/secure_storage_service.dart';
 import '../../../../core/security/environment_security_service.dart';
 
 import '../../../auth/domain/entities/user_entity.dart';
@@ -22,10 +24,14 @@ import '../../domain/usecases/submit_attendance.dart';
 import 'attendance_state.dart';
 
 class AttendanceCubit extends Cubit<AttendanceState> {
+  static final double faceMatchThreshold =
+      double.tryParse(const String.fromEnvironment('FACE_MATCH_THRESHOLD')) ??
+      0.65;
   final UserEntity user;
   final SubmitAttendance submitAttendanceUseCase;
   final GPSSnapshotService gpsSnapshotService;
   final FaceRecognitionService faceRecognitionService;
+  final SecureStorageService secureStorageService;
   StreamSubscription<Position>? _positionStreamSubscription;
 
   AttendanceCubit({
@@ -33,9 +39,11 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     required this.submitAttendanceUseCase,
     GPSSnapshotService? gpsSnapshotService,
     FaceRecognitionService? faceRecognitionService,
+    SecureStorageService? secureStorageService,
   }) : gpsSnapshotService = gpsSnapshotService ?? GPSSnapshotService(),
        faceRecognitionService =
            faceRecognitionService ?? FaceRecognitionService(),
+       secureStorageService = secureStorageService ?? SecureStorageService(),
        super(AttendanceInitial());
 
   @override
@@ -88,6 +96,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
           AttendanceSecurityBlocked(
             'Akses fitur absen diblokir karena terdeteksi: '
             '${reasons.join(', ')}. Matikan indikator tersebut lalu coba lagi.',
+            isDeveloperMode: securityAudit.isDevMode,
           ),
         );
         return;
@@ -151,6 +160,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
   Future<void> submitAttendanceWithImage(XFile photo) async {
     if (state is! AttendanceLoaded) return;
     final loadedState = state as AttendanceLoaded;
+    if (loadedState.isLibur) return;
 
     // Fake GPS can be enabled after the initial environment audit.
     if (kReleaseMode && loadedState.currentPosition != null) {
@@ -172,6 +182,50 @@ class AttendanceCubit extends Cubit<AttendanceState> {
         );
         return;
       }
+    }
+
+    List<double> currentEmbedding;
+    try {
+      final storedTemplate = await secureStorageService.readFaceEmbedding();
+      if (storedTemplate == null || storedTemplate.isEmpty) {
+        emit(
+          loadedState.copyWith(
+            submissionErrorMessage:
+                'Template wajah belum tersedia. Silakan login kembali.',
+          ),
+        );
+        return;
+      }
+      final decodedTemplate = jsonDecode(storedTemplate);
+      if (decodedTemplate is! List) throw const FormatException();
+      final registeredEmbedding = decodedTemplate
+          .map((value) => double.tryParse(value.toString()))
+          .whereType<double>()
+          .toList(growable: false);
+      currentEmbedding = await faceRecognitionService.generateEmbedding(
+        photo.path,
+      );
+      final similarity = faceRecognitionService.cosineSimilarity(
+        currentEmbedding,
+        registeredEmbedding,
+      );
+      if (similarity < faceMatchThreshold) {
+        emit(
+          loadedState.copyWith(
+            submissionErrorMessage:
+                'Wajah tidak cocok dengan perangkat terdaftar. Silakan ulangi.',
+          ),
+        );
+        return;
+      }
+    } catch (_) {
+      emit(
+        loadedState.copyWith(
+          submissionErrorMessage:
+              'Wajah tidak cocok dengan perangkat terdaftar. Silakan ulangi.',
+        ),
+      );
+      return;
     }
 
     // Emit submitting state
@@ -208,17 +262,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
       }
 
       // Generate Face Embedding (with fallback if model fails to load)
-      String faceRecognitionStr = '[]';
-      try {
-        final embedding = await faceRecognitionService.generateEmbedding(
-          photo.path,
-        );
-        faceRecognitionStr = embedding.toString();
-      } catch (e) {
-        debugPrint(
-          'Wajah gagal diproses atau model tidak tersedia: $e. Melanjutkan tanpa face recognition.',
-        );
-      }
+      final faceRecognitionStr = jsonEncode(currentEmbedding);
 
       final pos = loadedState.currentPosition;
       final String accuracyStr = pos?.accuracy.toString() ?? '0';
@@ -246,6 +290,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
         timestampDevice: timestampDeviceStr,
         isMockLocation: isMockLocStr,
         jarak: loadedState.distanceToNearest?.toStringAsFixed(2) ?? '0',
+        radius: loadedState.radiusToNearest?.toStringAsFixed(2) ?? '0',
         merek: merek,
         model: model,
         imagePath: await _compressImage(File(photo.path)),
@@ -343,7 +388,15 @@ class AttendanceCubit extends Cubit<AttendanceState> {
   }
 
   Future<void> _loadMapData() async {
-    final isWfa = user.wfaStatus == 1;
+    final rawScheduleType = user.result.jadwalAbsen?.tipe.trim().toLowerCase();
+    final scheduleType = rawScheduleType == null || rawScheduleType.isEmpty
+        ? null
+        : rawScheduleType;
+    final isLibur = scheduleType == 'lbr';
+    final isWfa =
+        !isLibur &&
+        (scheduleType == 'wfh' ||
+            (scheduleType == null && user.wfaStatus == 1));
 
     // prepare markers and circles
     final circles = <Circle>{};
@@ -362,7 +415,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
           Circle(
             circleId: CircleId(coord.id.toString()),
             center: position,
-            radius: 20, // 20 meters radius
+            radius: coord.radiusMeter,
             fillColor: Colors.green.withAlpha(70),
             strokeColor: Colors.green,
             strokeWidth: 2,
@@ -393,9 +446,10 @@ class AttendanceCubit extends Cubit<AttendanceState> {
     emit(
       AttendanceLoaded(
         isWfa: isWfa,
+        isLibur: isLibur,
         circles: circles,
         polygons: polygons,
-        isInsideRadius: isWfa,
+        isInsideRadius: isWfa || isLibur,
       ),
     );
 
@@ -454,6 +508,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
 
     bool inside = false;
     double minDistance = double.infinity;
+    double? radiusToNearest;
     String? nearestPlace;
 
     if (user.daftarKordinat.isNotEmpty) {
@@ -472,6 +527,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
 
           if (distance < minDistance) {
             minDistance = distance;
+            radiusToNearest = coord.radiusMeter;
             nearestPlace = coord.namaTempat;
           }
 
@@ -491,7 +547,11 @@ class AttendanceCubit extends Cubit<AttendanceState> {
 
           // Fallback to Radius if not already inside a polygon
           if (!inside) {
-            if (LocationUtils.isWithinRadius(currentLatLng, center, 20)) {
+            if (LocationUtils.isWithinRadius(
+              currentLatLng,
+              center,
+              coord.radiusMeter,
+            )) {
               inside = true;
             }
           }
@@ -507,6 +567,7 @@ class AttendanceCubit extends Cubit<AttendanceState> {
           distanceToNearest: minDistance == double.infinity
               ? null
               : minDistance,
+          radiusToNearest: radiusToNearest,
           nearestPlaceName: nearestPlace,
         ),
       );

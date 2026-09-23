@@ -15,6 +15,7 @@ abstract class AttendanceRepository {
     required String timestampDevice,
     required String isMockLocation,
     required String jarak,
+    required String radius,
     required String merek,
     required String model,
     required String imagePath,

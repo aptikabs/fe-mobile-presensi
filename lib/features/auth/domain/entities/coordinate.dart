@@ -7,6 +7,7 @@ class Coordinate extends Equatable {
   final String latitude;
   final String longitude;
   final String alamat;
+  final double radiusMeter;
   final List<PolygonPoint> polygonPoints;
 
   const Coordinate({
@@ -15,6 +16,7 @@ class Coordinate extends Equatable {
     required this.latitude,
     required this.longitude,
     required this.alamat,
+    this.radiusMeter = 20,
     this.polygonPoints = const [],
   });
 
@@ -25,6 +27,7 @@ class Coordinate extends Equatable {
     latitude,
     longitude,
     alamat,
+    radiusMeter,
     polygonPoints,
   ];
 }

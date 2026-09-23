@@ -22,6 +22,7 @@ class SubmitAttendance {
       timestampDevice: params.timestampDevice,
       isMockLocation: params.isMockLocation,
       jarak: params.jarak,
+      radius: params.radius,
       merek: params.merek,
       model: params.model,
       imagePath: params.imagePath,
@@ -45,6 +46,7 @@ class SubmitAttendanceParams extends Equatable {
   final String timestampDevice;
   final String isMockLocation;
   final String jarak;
+  final String radius;
   final String merek;
   final String model;
   final String imagePath;
@@ -65,6 +67,7 @@ class SubmitAttendanceParams extends Equatable {
     required this.timestampDevice,
     required this.isMockLocation,
     required this.jarak,
+    required this.radius,
     required this.merek,
     required this.model,
     required this.imagePath,
@@ -87,6 +90,7 @@ class SubmitAttendanceParams extends Equatable {
     timestampDevice,
     isMockLocation,
     jarak,
+    radius,
     merek,
     model,
     imagePath,

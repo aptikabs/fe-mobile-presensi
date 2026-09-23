@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../../../../core/constants/app_colors.dart';
 import '../../../../../core/network/network_info.dart';
 import '../../../../../core/network/pinned_http_client.dart';
+import '../../../../../core/di/service_locator.dart';
 import '../../../auth/presentation/bloc/auth/auth_cubit.dart';
 import '../../data/datasources/attendance_remote_datasource.dart';
 import '../../data/repositories/attendance_repository_impl.dart';
@@ -11,6 +12,7 @@ import '../../domain/usecases/submit_attendance.dart';
 import '../../../../../core/presentation/widgets/custom_toast.dart';
 import '../bloc/attendance_cubit.dart';
 import '../bloc/attendance_state.dart';
+import '../widgets/attendance_security_dialog.dart';
 
 import 'attendance_liveness_page.dart';
 
@@ -41,6 +43,7 @@ class AttendancePage extends StatelessWidget {
           return AttendanceCubit(
             user: authState.user,
             submitAttendanceUseCase: SubmitAttendance(repository),
+            secureStorageService: ServiceLocator.secureStorageService,
           )..initialize();
         },
         child: const AttendanceView(),
@@ -162,7 +165,11 @@ class _AttendanceViewState extends State<AttendanceView> {
           },
           listener: (context, state) {
             if (state is AttendanceSecurityBlocked) {
-              _showResultDialog(context, false, state.message);
+              showAttendanceSecurityDialog(
+                context,
+                state.message,
+                isDeveloperMode: state.isDeveloperMode,
+              );
               return;
             }
 
@@ -412,6 +419,7 @@ class _AttendanceViewState extends State<AttendanceView> {
     final placeName = state.nearestPlaceName ?? 'Lokasi Tidak Diketahui';
 
     final bool canPresensi =
+        !state.isLibur &&
         !state.isLoadingLocation &&
         state.currentPosition != null &&
         (state.isWfa || state.isInsideRadius);
@@ -421,7 +429,9 @@ class _AttendanceViewState extends State<AttendanceView> {
         : AppColors.error;
 
     final String buttonText;
-    if (canPresensi) {
+    if (state.isLibur) {
+      buttonText = "Hari Libur";
+    } else if (canPresensi) {
       buttonText = "Lanjutkan Presensi";
     } else if (state.isLoadingLocation || state.currentPosition == null) {
       buttonText = "Memeriksa Lokasi...";
@@ -517,7 +527,44 @@ class _AttendanceViewState extends State<AttendanceView> {
               ),
             ),
             const SizedBox(height: 24),
-            if (!state.isWfa && !state.isInsideRadius)
+            Text(
+              state.isLibur ? "LBR" : (state.isWfa ? "WFH" : "WFO"),
+              style: TextStyle(
+                color: state.isLibur ? AppColors.error : AppColors.primary500,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (state.isLibur)
+              Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppColors.error.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.event_busy, color: AppColors.error),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        "Hari ini tidak ada jadwal presensi",
+                        style: TextStyle(
+                          color: AppColors.error,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else if (!state.isWfa && !state.isInsideRadius)
               Container(
                 margin: const EdgeInsets.only(bottom: 16),
                 padding: const EdgeInsets.all(12),

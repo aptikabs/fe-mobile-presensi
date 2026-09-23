@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 
 import '../../core/services/notification_service.dart';
 import '../../core/network/network_info.dart';
+import '../../core/di/service_locator.dart';
 import '../../core/presentation/bloc/connectivity_cubit.dart';
 import '../../features/auth/data/datasources/auth_local_data_source.dart';
 import '../../features/auth/data/datasources/auth_remote_data_source.dart';
@@ -47,6 +48,7 @@ class AppProviders {
       remoteDataSource: authRemoteDataSource,
       localDataSource: authLocalDataSource,
       networkInfo: networkInfo,
+      secureStorageService: ServiceLocator.secureStorageService,
     );
 
     final historyRepository = HistoryRepositoryImpl(
@@ -87,10 +89,7 @@ class AppProviders {
     ];
   }
 
-  static List<BlocProvider> getBlocs(
-    Box settingsBox,
-    NetworkInfo networkInfo,
-  ) {
+  static List<BlocProvider> getBlocs(Box settingsBox, NetworkInfo networkInfo) {
     return [
       BlocProvider<ConnectivityCubit>(
         create: (_) => ConnectivityCubit(networkInfo: networkInfo),
@@ -99,6 +98,7 @@ class AppProviders {
         create: (context) => AuthCubit(
           localDataSource: context.read<AuthLocalDataSource>(),
           authRepository: context.read<AuthRepository>(),
+          secureStorageService: ServiceLocator.secureStorageService,
         )..checkAuthStatus(),
       ),
       BlocProvider<LogCubit>(

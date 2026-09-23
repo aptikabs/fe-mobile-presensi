@@ -19,6 +19,7 @@ abstract class AttendanceRemoteDataSource {
     required String timestampDevice,
     required String isMockLocation,
     required String jarak,
+    required String radius,
     required String merek,
     required String model,
     required String imagePath,
@@ -40,7 +41,8 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
     if (data['error'] != null && data['error'].toString().trim().isNotEmpty) {
       return data['error'].toString().trim();
     }
-    if (data['message'] != null && data['message'].toString().trim().isNotEmpty) {
+    if (data['message'] != null &&
+        data['message'].toString().trim().isNotEmpty) {
       return data['message'].toString().trim();
     }
     if (data['errors'] != null) {
@@ -54,7 +56,8 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
             return firstVal.toString();
           }
         }
-      } else if (data['errors'] is List && (data['errors'] as List).isNotEmpty) {
+      } else if (data['errors'] is List &&
+          (data['errors'] as List).isNotEmpty) {
         return (data['errors'] as List).first.toString();
       }
     }
@@ -106,6 +109,7 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
     required String timestampDevice,
     required String isMockLocation,
     required String jarak,
+    required String radius,
     required String merek,
     required String model,
     required String imagePath,
@@ -129,6 +133,7 @@ class AttendanceRemoteDataSourceImpl implements AttendanceRemoteDataSource {
       'timestamp_device': timestampDevice,
       'is_mock_location': isMockLocation,
       'jarak_kordinat_meter': jarak,
+      'radius_meter': radius,
       'merek': merek,
       'model': model,
       'gps_snapshot': json.encode(gpsSnapshot),

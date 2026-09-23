@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import '../../../../core/error/exceptions.dart';
+import '../../../../core/security/secure_storage_service.dart';
 import '../../../../core/network/network_info.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -9,11 +12,13 @@ class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
   final AuthLocalDataSource localDataSource;
   final NetworkInfo networkInfo;
+  final SecureStorageService? secureStorageService;
 
   AuthRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
     required this.networkInfo,
+    this.secureStorageService,
   });
 
   @override
@@ -31,6 +36,12 @@ class AuthRepositoryImpl implements AuthRepository {
       password: password,
       deviceId: deviceId,
     );
+    final embedding = userModel.faceRecognition;
+    if (embedding != null && embedding.isNotEmpty) {
+      await secureStorageService?.saveFaceEmbedding(jsonEncode(embedding));
+    } else {
+      await secureStorageService?.deleteFaceEmbedding();
+    }
     await localDataSource.cacheUser(userModel);
     await localDataSource.saveCredentials(username, password);
     return userModel;
@@ -65,6 +76,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String model,
     required String fingerprint,
     required String imagePath,
+    required List<double> faceEmbedding,
   }) async {
     if (!await networkInfo.isConnected) {
       throw NetworkException(type: NetworkErrorType.noConnection);
@@ -77,6 +89,7 @@ class AuthRepositoryImpl implements AuthRepository {
       model: model,
       fingerprint: fingerprint,
       imagePath: imagePath,
+      faceEmbedding: faceEmbedding,
     );
   }
 

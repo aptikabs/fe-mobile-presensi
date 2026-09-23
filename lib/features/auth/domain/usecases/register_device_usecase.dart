@@ -12,6 +12,7 @@ class RegisterDeviceUseCase {
     required String model,
     required String fingerprint,
     required String imagePath,
+    required List<double> faceEmbedding,
   }) async {
     return await repository.registerDevice(
       nip: nip,
@@ -20,6 +21,7 @@ class RegisterDeviceUseCase {
       model: model,
       fingerprint: fingerprint,
       imagePath: imagePath,
+      faceEmbedding: faceEmbedding,
     );
   }
 }
